@@ -64,13 +64,35 @@ export class Cursor {
     return this.#host?.request(payload, getter);
   }
 
+  async all() {
+    return [...this.#result];
+  }
+
   async *next() {
     for await (let value of this.#result) {
       yield value;
     }
   }
 
-  async all() {
-    return [...this.#result];
+  async *[Symbol.asyncIterator](): AsyncGenerator<
+    unknown,
+    undefined,
+    undefined
+  > {
+    for (let result of this.#result) {
+      yield result;
+    }
+    return undefined;
+  }
+
+  async kill(): Promise<void> {
+    if (!this.hasMore || !this.#id) return;
+    const payload = {
+      method: "delete",
+      url: this.#database._api(`cursor`, this.#id),
+    };
+    const getter = () => void (this.#hasMore = false);
+
+    return await this.#host?.request(payload, getter);
   }
 }

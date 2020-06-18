@@ -65,13 +65,13 @@ export class Database {
   async query(
     query: { query: string; bindVars: Record<string, AqlValue> },
     options?: any,
-  ): Promise<any>;
+  ): Promise<Cursor>;
   async query(
     query: string,
     bindVars: Record<string, AqlValue>,
     options?: any,
-  ): Promise<any>;
-  async query(...args: any[]): Promise<any> {
+  ): Promise<Cursor>;
+  async query(...args: any[]): Promise<Cursor> {
     let query, bindVars, options;
 
     if (typeof args[0]?.query === "string") {

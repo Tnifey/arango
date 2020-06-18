@@ -10,12 +10,11 @@ export function concatHeaders(
   const headers = new Headers(base);
 
   for (let custom of args) {
-    const iterable =
-      custom instanceof Headers
-        ? custom.entries()
-        : typeof custom === "object"
-        ? Object.entries(custom)
-        : undefined;
+    const iterable = custom instanceof Headers
+      ? custom.entries()
+      : typeof custom === "object"
+      ? Object.entries(custom)
+      : undefined;
 
     if (iterable) {
       for (let [name, value] of iterable) {
