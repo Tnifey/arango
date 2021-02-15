@@ -1,77 +1,32 @@
-import { concatHeaders } from "./utils.ts";
-import { Host } from "./Host.ts";
+import { IArangoCredentials, IPoolConfig } from "./types.ts";
 import { Database } from "./Database.ts";
-import { PoolConfig } from "./types.ts";
 
-/**
- * Create connection pool
- */
 export class Pool {
-  #hosts: Host[] = [];
-  #headers: Headers = new Headers();
-  #loadBalancingStrategy: string = "NONE";
+  #url: string[] = ["http://localhost:8529"];
+  #auth?: IArangoCredentials;
 
-  constructor(init?: PoolConfig) {
-    const config: PoolConfig = init || {};
-
-    if (Array.isArray(config?.url)) {
-      for (let url of config.url) {
-        this.#hosts.push(new Host(this, url));
+  constructor(config?: IPoolConfig) {
+    if (config?.url) {
+      if (Array.isArray(config.url)) {
+        this.#url = config?.url;
+      } else {
+        this.#url = [config?.url];
       }
     }
 
-    if (typeof config?.auth === "string") {
-      this.useBearerAuth(config.auth);
-    }
-
-    if (typeof (config?.auth as any)?.username === "string") {
-      this.useBasicAuth(
-        (config.auth as any).username ?? "root",
-        (config.auth as any).password ?? "",
-      );
-    }
-
-    if (config?.headers) {
-      this.#headers = new Headers(config.headers);
-    }
+    this.#auth = config?.auth;
   }
 
-  get headers() {
-    return this.#headers;
+  get url() {
+    return this.#url;
   }
 
-  addHeaders(value: Headers | Record<string, string>) {
-    this.#headers = concatHeaders(this.#headers, value);
-  }
-
-  get host() {
-    const strategy = this.#loadBalancingStrategy ?? "NONE";
-    const hosts = [...this.#hosts];
-
-    switch (strategy) {
-      case "ONE_RANDOM":
-        return hosts[Math.floor(Math.random() * hosts.length)];
-      case "NONE":
-      default:
-        return hosts[0];
-    }
-  }
-
-  useBasicAuth(username: string = "root", password: string = "") {
-    const token = btoa(`${username}:${password}`);
-    this.headers.set("authorization", `Basic ${token};`);
-  }
-
-  useBearerAuth(token: string) {
-    this.headers.set("authorization", `Bearer ${token}`);
-  }
-
-  /**
-   * Create new database instance
-   * @param name
-   * @param isAbsolute
-   */
-  database(name: string, isAbsolute: boolean = false) {
-    return new Database(this, { name, isAbsolute });
+  database(name: string, isAbsolute?: boolean) {
+    return new Database({
+      url: this.#url,
+      auth: this.#auth,
+      name,
+      isAbsolute,
+    });
   }
 }
