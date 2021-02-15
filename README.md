@@ -1,4 +1,4 @@
-# arango
+# arango @ 0.0.2
 
 Simple ArangoDB driver for Deno
 
@@ -18,7 +18,7 @@ typescript 4.1.4
 import {
   aql,
   Database,
-} from "https://raw.githubusercontent.com/Tnifey/arango/master/mod.ts";
+} from "https://github.com/Tnifey/arango/raw/0.0.2/mod.ts";
 
 const db = new Database({
   url: "http://localhost:8529/",
