@@ -1,17 +1,25 @@
+// deno-lint-ignore-file
 import {
   assert,
   AssertionError,
 } from "https://deno.land/std/testing/asserts.ts";
-import arango, { Pool, aql, Database } from "../mod.ts";
+import arango, { aql, Database, Pool } from "../mod.ts";
 import { Cursor } from "../src/Cursor.ts";
+
+Deno.test({
+  name: "create database instance using function",
+  async fn() {
+    const name = "_system";
+    const database = arango().database(name);
+    assert(database.name === name);
+  },
+});
 
 Deno.test({
   name: "create database instance with class",
   async fn() {
     const name = "_system";
-    const pool = arango();
-    const database = new Database(pool, { name });
-
+    const database = new Database({ name });
     assert(database.name === name);
   },
 });
@@ -21,7 +29,6 @@ Deno.test({
   async fn() {
     const name = "_system";
     const pool = new Pool();
-
     const database = pool.database(name);
     assert(database.name === name);
   },
@@ -95,7 +102,6 @@ Deno.test({
 
     assert(result.hasMore, "invalid hasMore property");
     const more = await result.more();
-
     assert(!!more, "invalid cursor");
 
     if (more) {

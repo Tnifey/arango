@@ -2,40 +2,96 @@
 
 Simple ArangoDB driver for Deno
 
+tested on
+
+```
+arangodb: 3.7.6
+---
+deno 1.7.4 (release, x86_64-unknown-linux-gnu)
+v8 9.0.123
+typescript 4.1.4
+```
+
 ## Usage
 
 ```ts
-import arango, {
+import {
   aql,
+  Database,
 } from "https://raw.githubusercontent.com/Tnifey/arango/master/mod.ts";
 
-const pool = arango({
-  // array of urls
-  url: ["http://localhost:8529"],
-
-  // use basic auth
-  auth: { username: "root", password: "password" },
-  // or use bearer token
-  auth: "token",
+const db = new Database({
+  url: "http://localhost:8529/",
+  auth: { username: "root" },
+  name: "_system", // database name
 });
 
-const systemDatabase = pool.database("_system");
-const otherDatabase = pool.database("other");
+// Alternative:
+// const pool = arango({
+//   url: "http://localhost:8529/",
+//   auth: { username: "root" },
+// });
+// const db = pool.database('_system');
 
-// get jwt token for bearer auth
-const jwt = await systemDatabase.login("root", "password");
+const payload = 4;
 
-const query = aql`
-  for user in Users
-  return user
+const query = aql` 
+  let nums = ${payload}
+  for i in 1..nums // [1,2,3,4]
+    return i + 1
 `;
 
-const cursor = await systemDatabase.query(query, { batchSize: 2 }); // Cursor
+try {
+  const cursor = await db.query(query, { batchSize: 2 });
 
-const usersList = await cursor.all(); // any[]
+  console.log({
+    cursor: await cursor.all(), // { cursor: [ 2, 3 ] }
+  });
 
-if (cursor.hasMore()) {
-  const next = await cursor.nextBatch(); // Cursor
+  const more = await cursor.nextBatch(); // it is new Cursor or undefined
+
+  console.log({
+    more: await more?.all(), // { more: [ 4, 5 ] }
+  });
+} catch (error) {
+  console.log(error);
+}
+```
+
+### Using collections
+
+```ts
+import { aql, Database } from "./mod.ts";
+import { CollectionType } from "./src/types.ts";
+
+const db = new Database({
+  url: "http://localhost:8529/",
+  auth: { username: "root" },
+  name: "_system", // database name
+});
+
+const collectionName = "test-collection";
+const collection = db.collection(collectionName);
+
+const exists = await collection.exists();
+if (!exists) { // create collection if not exists
+  await db.createCollection({
+    name: collectionName,
+    type: CollectionType.DOCUMENT_COLLECTION, // 2 - document collection, 3 - edge collection
+  });
+}
+
+try {
+  const queryToExplain = aql`
+    for u in ${collection}
+      limit 2
+    return u
+  `;
+
+  const explain = await db.explain(queryToExplain);
+  console.log(explain);
+} catch (error) {
+  console.log(error);
 }
 ```
 

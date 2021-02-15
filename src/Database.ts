@@ -1,105 +1,214 @@
-import { posix } from "https://deno.land/std/node/path.ts";
-import { Pool } from "../mod.ts";
+import { ArangoErrorCode, GeneratedAqlQuery } from "./deps.ts";
+import { createRequest } from "./request/request.ts";
 import { Cursor } from "./Cursor.ts";
-import { AqlValue } from "./aql.ts";
+import { Collection } from "./Collection.ts";
+import { ArangoError } from "./request/Error.ts";
+import {
+  CollectionType,
+  Dict,
+  IArangoConfig,
+  IArangoQueryOptions,
+  ICollectionCreate,
+} from "./types.ts";
 
 export class Database {
-  #pool: Pool;
-  #name: string = "_system";
-  #isAbsolute: boolean = false;
+  #url = "http://localhost:8529/";
+  #headers = new Headers({
+    "content-type": "application/json",
+  });
 
-  constructor(pool: Pool, init: DatabaseConfig) {
-    this.#pool = pool;
-    this.#name = init?.name ?? "_system";
-    this.#isAbsolute = Boolean(init?.isAbsolute ?? false);
+  #name = "_system";
+  #isAbsolute?: boolean;
+  #request;
+
+  constructor(config?: IArangoConfig) {
+    if (config?.name) {
+      this.#name = config.name;
+    }
+
+    if (config?.isAbsolute) {
+      this.#isAbsolute = config.isAbsolute;
+    }
+
+    if (Array.isArray(config?.url)) {
+      if ((config?.url?.length ?? 0) > 1) {
+        console.warn(`this lib is for single instance, only first url is used`);
+      }
+      if (config?.url?.length === 1 && typeof config?.url[0] === "string") {
+        this.#url = config?.url[0];
+      } else {
+        throw new Error(`Arango: invalid configuration: url`);
+      }
+    }
+
+    if (typeof config?.auth === "string") {
+      this.useBearerAuth(config.auth);
+    } else {
+      this.useBasicAuth(config?.auth?.username, config?.auth?.password);
+    }
+
+    this.#request = createRequest(this.#url, this);
   }
 
-  get pool() {
-    return this.#pool;
+  get url() {
+    return this.#url;
   }
 
   get name() {
     return this.#name;
   }
 
-  get url() {
-    return `_db/${this.#name}/`;
-  }
-
-  private _url(...suffix: string[]) {
-    if (this.#isAbsolute === true) {
-      return posix.join(...suffix);
-    }
-    return posix.join(`_db`, this.#name, ...suffix);
-  }
-
-  public _open(...suffix: string[]) {
-    return this._url("_open", ...suffix);
-  }
-
-  public _api(...suffix: string[]) {
-    return this._url("_api", ...suffix);
-  }
-
   get isAbsolute() {
     return this.#isAbsolute;
   }
 
-  async login(
-    username: string = "root",
-    password: string = "",
-  ): Promise<string> {
-    const payload = {
-      method: "post",
-      url: this._open(`auth`),
-      body: {
-        username,
-        password,
-      },
-    };
-
-    const getter = ({ data }: any) => data?.jwt;
-    return this.pool.host.request(payload, getter);
+  get headers(): Headers {
+    return this.#headers;
   }
 
-  async query(
-    query: { query: string; bindVars: Record<string, AqlValue> },
-    options?: any,
-  ): Promise<Cursor>;
-  async query(
-    query: string,
-    bindVars: Record<string, AqlValue>,
-    options?: any,
-  ): Promise<Cursor>;
-  async query(...args: any[]): Promise<Cursor> {
-    let query, bindVars, options;
+  get request() {
+    return this.#request;
+  }
 
-    if (typeof args[0]?.query === "string") {
-      query = args[0]?.query;
-      bindVars = args[0]?.bindVars ?? {};
-      options = args[1] ?? {};
-    } else {
-      query = args[0];
-      bindVars = args[1] ?? {};
-      options = args[2] ?? {};
+  useBearerAuth(token: string): void {
+    this.headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  useBasicAuth(username = "root", password = ""): void {
+    const credentials = btoa(`${username}:${password}`);
+    this.headers.set("Authorization", `Basic ${credentials}`);
+  }
+
+  async query<T = unknown>(
+    query: GeneratedAqlQuery,
+    opts?: Partial<IArangoQueryOptions>,
+  ) {
+    const body: Record<string, unknown> = {
+      query: query.query,
+      bindVars: query.bindVars,
+    };
+
+    if (opts?.batchSize) body.batchSize = opts.batchSize;
+    if (opts?.cache) body.cache = opts.cache;
+
+    try {
+      const data = await this.request({
+        method: "post",
+        path: `_api/cursor`,
+        body,
+      });
+
+      return new Cursor<T>(data, this);
+    } catch (error) {
+      throw error;
     }
-
-    const payload = {
-      method: "post",
-      url: this._api(`cursor`),
-      body: {
-        ...options,
-        query,
-        bindVars,
-      },
-    };
-
-    const getter = ({ data, host }: any) => new Cursor(this, { host, ...data });
-    return this.pool.host.request(payload, getter);
   }
-}
 
-export interface DatabaseConfig {
-  name: string;
-  isAbsolute?: boolean;
+  async get() {
+    try {
+      return await this.request({
+        method: "get",
+        path: `_api/database/current`,
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async exists(): Promise<boolean> {
+    try {
+      await this.get();
+      return true;
+    } catch (error) {
+      if (
+        error instanceof ArangoError &&
+        ArangoErrorCode.ERROR_ARANGO_DATABASE_NOT_FOUND
+      ) {
+        return false;
+      }
+      throw error;
+    }
+  }
+
+  async listDatabases(): Promise<string[]> {
+    try {
+      return await this.request({
+        method: "get",
+        path: `_api/database`,
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async listUserDatabases(): Promise<string[]> {
+    try {
+      return await this.request({
+        method: "get",
+        path: `_api/database`,
+      }).then(({ result }) => result);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async explain(query: GeneratedAqlQuery): Promise<string[]> {
+    try {
+      return await this.request({
+        method: "post",
+        path: `_api/explain`,
+        body: {
+          query: query.query,
+          bindVars: query.bindVars,
+        },
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async login(username = "root", password = ""): Promise<string> {
+    this.useBasicAuth(username, password);
+    try {
+      const data = await this.request({
+        method: "post",
+        path: `_open/auth`,
+        body: {
+          username,
+          password,
+        },
+      });
+
+      return data.jwt;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  collection(name: string) {
+    return new Collection({ name }, this);
+  }
+
+  createCollection(config: ICollectionCreate & Dict) {
+    if (typeof config?.name !== "string") {
+      throw new Error(`ArangoError: must provide collection name while create`);
+    }
+    try {
+      const data = this.request({
+        method: "post",
+        path: `_api/collection`,
+        body: {
+          ...config,
+          name: config.name,
+          type: typeof config.type === "string"
+            ? CollectionType[config.type]
+            : config.type,
+        },
+      });
+
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
