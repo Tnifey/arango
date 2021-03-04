@@ -1,3 +1,6 @@
+import type { Collection } from "./Collection.ts";
+import type { AqlValue } from "./deps.ts";
+
 export interface IPoolConfig {
   /**
    * Database host url
@@ -154,3 +157,25 @@ export interface ICollectionCreate {
   name: string;
   type: CollectionType;
 }
+
+export interface IArangoTranscatctionConfig {
+  action: string;
+  collections: IArangoTranscatctionIsolationContext;
+  params?: Record<string, AqlValue>;
+  waitForSync?: boolean;
+  allowImplicit?: boolean;
+  lockTimeout?: number;
+  maxTransactionSize?: number;
+}
+
+export interface IArangoTranscatctionIsolationContext {
+  read?: ICollectionButIDontKnow;
+  write?: ICollectionButIDontKnow;
+  exclusive?: ICollectionButIDontKnow;
+  allowImplicit?: boolean;
+}
+
+export type ICollectionButIDontKnow =
+  | string
+  | Collection
+  | (string | Collection)[];

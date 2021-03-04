@@ -8,6 +8,7 @@ import {
   Dict,
   IArangoConfig,
   IArangoQueryOptions,
+  IArangoTranscatctionConfig,
   ICollectionCreate,
 } from "./types.ts";
 
@@ -39,6 +40,8 @@ export class Database {
       } else {
         throw new Error(`Arango: invalid configuration: url`);
       }
+    } else if (typeof config?.url === "string") {
+      this.#url = config?.url;
     }
 
     if (typeof config?.auth === "string") {
@@ -204,6 +207,20 @@ export class Database {
             ? CollectionType[config.type]
             : config.type,
         },
+      });
+
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  executeTransaction(config?: IArangoTranscatctionConfig) {
+    try {
+      const data = this.request({
+        method: "post",
+        path: `_api/transaction`,
+        body: { ...config },
       });
 
       return data;
