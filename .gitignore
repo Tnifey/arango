@@ -104,3 +104,6 @@ dist
 .tern-port
 
 test.ts
+
+Dockerfile
+docker-compose.yml

@@ -7,7 +7,7 @@ import arango, { aql, Database, Pool } from "../mod.ts";
 import { Cursor } from "../src/Cursor.ts";
 
 Deno.test({
-  name: "create database instance using function",
+  name: "database -> create database instance using function",
   async fn() {
     const name = "_system";
     const database = arango().database(name);
@@ -16,7 +16,7 @@ Deno.test({
 });
 
 Deno.test({
-  name: "create database instance with class",
+  name: "database -> create database instance with class",
   async fn() {
     const name = "_system";
     const database = new Database({ name });
@@ -25,7 +25,7 @@ Deno.test({
 });
 
 Deno.test({
-  name: "create database with instance of Pool",
+  name: "database -> create database with instance of Pool",
   async fn() {
     const name = "_system";
     const pool = new Pool();
@@ -35,7 +35,7 @@ Deno.test({
 });
 
 Deno.test({
-  name: "aql tag",
+  name: "database -> aql tag",
   async fn() {
     const query = aql`return 1`;
     assert(query?.query === `return 1`);
@@ -43,7 +43,7 @@ Deno.test({
 });
 
 Deno.test({
-  name: "database query",
+  name: "database -> database query",
   async fn() {
     const name = "_system";
     const database = new Pool().database(name);
@@ -60,7 +60,7 @@ Deno.test({
 });
 
 Deno.test({
-  name: "database query bindVars",
+  name: "database -> database query bindVars",
   async fn() {
     const name = "_system";
     const database = new Pool().database(name);
@@ -77,7 +77,7 @@ Deno.test({
 });
 
 Deno.test({
-  name: "database query batch",
+  name: "database -> database query batch",
   async fn() {
     const name = "_system";
     const database = new Pool().database(name);
