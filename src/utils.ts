@@ -9,16 +9,15 @@ export function concatHeaders(
 ) {
   const headers = new Headers(base);
 
-  for (let custom of args) {
-    const iterable =
-      custom instanceof Headers
-        ? custom.entries()
-        : typeof custom === "object"
-        ? Object.entries(custom)
-        : undefined;
+  for (const custom of args) {
+    const iterable = custom instanceof Headers
+      ? custom.entries()
+      : typeof custom === "object"
+      ? Object.entries(custom)
+      : undefined;
 
     if (iterable) {
-      for (let [name, value] of iterable) {
+      for (const [name, value] of iterable) {
         headers.set(name, value);
       }
     }

@@ -1,29 +1,31 @@
 // deno-lint-ignore-file
-import { assert, assertExists } from "https://deno.land/std/testing/asserts.ts";
+import {
+  assert,
+  assertEquals,
+  assertExists,
+} from "https://deno.land/std/testing/asserts.ts";
 import { Database } from "../mod.ts";
 import { ArangoError } from "../src/request/Error.ts";
 
-Deno.test({
-  name: `create instance of collection`,
-  async fn() {
-    const name = "test-collection";
-    const db = new Database();
+const name = "test-collection";
+const db = new Database();
 
+Deno.test({
+  name: `collection -> create instance`,
+  async fn() {
     const collection = db.collection(name);
     assert(collection.name === name);
   },
 });
 
 Deno.test({
-  name: `drop collection non existent`,
+  name: `collection -> create collection`,
   async fn() {
-    const name = "test-collection";
-    const db = new Database();
-
     try {
-      const collection = db.collection(name);
-      const nonExist = collection.dropCollection(name);
-      assertExists(nonExist);
+      const result = await db.createCollection({ name, type: 3 });
+
+      assertEquals(result.error, false);
+      assertEquals(result.name, name);
     } catch (error) {
       assert(error instanceof ArangoError);
     }
@@ -31,15 +33,45 @@ Deno.test({
 });
 
 Deno.test({
-  name: `drop collection`,
+  name: `collection -> get collection`,
   async fn() {
-    const name = "test-collection";
-    const db = new Database();
-
     try {
       const collection = db.collection(name);
+      const result = await collection.get();
+      assertEquals(result.name, name);
+    } catch (error) {
+      assert(error instanceof ArangoError);
+    }
+  },
+});
 
-      collection.dropCollection(name);
+Deno.test({
+  name: `collection -> get / set properties`,
+  async fn() {
+    try {
+      const collection = db.collection(name);
+      const propertiesBefore = await collection.properties();
+
+      assertExists(propertiesBefore.waitForSync);
+
+      const propertiesAfter = await collection.setProperties({
+        waitForSync: !propertiesBefore.waitForSync,
+      });
+
+      assertEquals(propertiesAfter.waitForSync, !propertiesBefore.waitForSync);
+    } catch (error) {
+      assert(error instanceof ArangoError);
+    }
+  },
+});
+
+Deno.test({
+  name: `collection -> drop collection`,
+  async fn() {
+    try {
+      const collection = db.collection(name);
+      const result = await collection.dropCollection(name);
+      assertEquals(result.error, false);
     } catch (error) {
       assert(error instanceof ArangoError);
     }
