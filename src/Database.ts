@@ -31,17 +31,8 @@ export class Database {
       this.#isAbsolute = config.isAbsolute;
     }
 
-    if (Array.isArray(config?.url)) {
-      if ((config?.url?.length ?? 0) > 1) {
-        console.warn(`this lib is for single instance, only first url is used`);
-      }
-      if (config?.url?.length === 1 && typeof config?.url[0] === "string") {
-        this.#url = config?.url[0];
-      } else {
-        throw new Error(`Arango: invalid configuration: url`);
-      }
-    } else if (typeof config?.url === "string") {
-      this.#url = config?.url;
+    if (config?.url) {
+      this.setUrl(config?.url);
     }
 
     if (typeof config?.auth === "string") {
@@ -50,6 +41,22 @@ export class Database {
       this.useBasicAuth(config?.auth?.username, config?.auth?.password);
     }
 
+    this.#request = createRequest(this.#url, this);
+  }
+
+  setUrl(url: string | string[] = this.#url) {
+    if (typeof url === "string") {
+      this.#url = url;
+    } else if (Array.isArray(url) && typeof url[0] === "string") {
+      this.#url = url[0];
+      if (url.length > 1) {
+        console.warn(
+          `\n\nThis version on 'tnifey/arango' is for single instance only. ${this.#url} is used for database connection.\n\n`,
+        );
+      }
+    }
+
+    // info: recreate request on url change
     this.#request = createRequest(this.#url, this);
   }
 
