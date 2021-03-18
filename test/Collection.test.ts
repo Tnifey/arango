@@ -1,9 +1,5 @@
 // deno-lint-ignore-file
-import {
-  assert,
-  assertEquals,
-  assertExists,
-} from "https://deno.land/std/testing/asserts.ts";
+import { assert, assertEquals, assertExists } from "./deps_test.ts";
 import { Database } from "../mod.ts";
 import { ArangoError } from "../src/request/Error.ts";
 
