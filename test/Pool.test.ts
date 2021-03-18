@@ -1,5 +1,5 @@
 // deno-lint-ignore-file
-import { assert } from "https://deno.land/std/testing/asserts.ts";
+import { assert } from "./deps_test.ts";
 import arango, { Pool } from "../mod.ts";
 
 Deno.test({

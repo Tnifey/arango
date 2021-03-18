@@ -10,6 +10,7 @@ import {
   IArangoQueryOptions,
   IArangoTranscatctionConfig,
   ICollectionCreate,
+  ITransactionResponse,
 } from "./types.ts";
 
 export class Database {
@@ -84,6 +85,12 @@ export class Database {
   useBasicAuth(username = "root", password = ""): void {
     const credentials = btoa(`${username}:${password}`);
     this.headers.set("Authorization", `Basic ${credentials}`);
+  }
+
+  useDatabase(name: string, isAbsolute?: boolean) {
+    const database = new Database({ url: this.url, name, isAbsolute });
+    database.headers.set("Authorization", this.headers.get("Authorization")!);
+    return database;
   }
 
   async query<T = unknown>(
@@ -219,15 +226,38 @@ export class Database {
     }
   }
 
-  executeTransaction(config?: IArangoTranscatctionConfig) {
+  executeTransaction(
+    action: string,
+    options?: Omit<IArangoTranscatctionConfig, "action">,
+  ): Promise<ITransactionResponse>;
+  executeTransaction(
+    config: IArangoTranscatctionConfig,
+  ): Promise<ITransactionResponse>;
+  async executeTransaction(
+    a: string | IArangoTranscatctionConfig,
+    b?: Omit<IArangoTranscatctionConfig, "action">,
+  ): Promise<ITransactionResponse> {
     try {
-      const data = this.request({
+      const config: Partial<IArangoTranscatctionConfig> = {
+        collections: {},
+      };
+
+      if (typeof a === "string") {
+        Object.assign(config, b);
+        config.action = a;
+      } else if ("action" in a) {
+        Object.assign(config, a);
+      } else {
+        throw new ArangoError(
+          `Execute transaction fails. Cause: wrong executeTransaction parameters.`,
+        );
+      }
+
+      return await this.request({
         method: "post",
         path: `_api/transaction`,
         body: { ...config },
-      });
-
-      return data;
+      }) as ITransactionResponse;
     } catch (error) {
       throw error;
     }

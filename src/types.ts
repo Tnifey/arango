@@ -160,7 +160,7 @@ export interface ICollectionCreate {
 
 export interface IArangoTranscatctionConfig {
   action: string;
-  collections: IArangoTranscatctionIsolationContext;
+  collections?: IArangoTranscatctionIsolationContext;
   params?: Record<string, AqlValue>;
   waitForSync?: boolean;
   allowImplicit?: boolean;
@@ -173,6 +173,12 @@ export interface IArangoTranscatctionIsolationContext {
   write?: ICollectionButIDontKnow;
   exclusive?: ICollectionButIDontKnow;
   allowImplicit?: boolean;
+}
+
+export interface ITransactionResponse<T extends AqlValue = AqlValue> {
+  error: boolean;
+  code: number;
+  result: T;
 }
 
 export type ICollectionButIDontKnow =
