@@ -56,6 +56,9 @@ export class Database {
         );
       }
     }
+
+    // info: recreate request on url change
+    this.#request = createRequest(this.#url, this);
   }
 
   get url() {
