@@ -1,15 +1,15 @@
-# arango @ 0.0.2
+# arango @ 0.0.3
 
 Simple ArangoDB driver for Deno
 
 tested on
 
 ```
-arangodb: 3.7.6
+arangodb: 3.7.8
 ---
-deno 1.7.4 (release, x86_64-unknown-linux-gnu)
-v8 9.0.123
-typescript 4.1.4
+deno 1.8.1 (release, x86_64-unknown-linux-gnu)
+v8 9.0.257.3
+typescript 4.2.2
 ```
 
 ## Usage
@@ -74,7 +74,8 @@ const collectionName = "test-collection";
 const collection = db.collection(collectionName);
 
 const exists = await collection.exists();
-if (!exists) { // create collection if not exists
+if (!exists) {
+  // create collection if not exists
   await db.createCollection({
     name: collectionName,
     type: CollectionType.DOCUMENT_COLLECTION, // 2 - document collection, 3 - edge collection
