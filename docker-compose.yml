@@ -1,0 +1,15 @@
+version: "3.2"
+
+services:
+  tnifey_arango_testing:
+    image: "arangodb:3.7.10"
+    environment:
+      - "ARANGO_NO_AUTH=1"
+    ports:
+      - "8529:8529"
+  tnifey_arango_testing_with_password:
+    image: "arangodb:3.7.10"
+    environment:
+      - "ARANGO_ROOT_PASSWORD=secret"
+    ports:
+      - "8530:8529"

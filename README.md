@@ -1,13 +1,9 @@
-# arango @ 0.0.3
-
 Simple ArangoDB driver for Deno
 
-tested on
-
 ```
-arangodb: 3.7.8
+arangodb: 3.7.10
 ---
-deno 1.8.1 (release, x86_64-unknown-linux-gnu)
+deno 1.8.2 (release, x86_64-unknown-linux-gnu)
 v8 9.0.257.3
 typescript 4.2.2
 ```
@@ -18,7 +14,7 @@ typescript 4.2.2
 import {
   aql,
   Database,
-} from "https://github.com/Tnifey/arango/raw/0.0.2/mod.ts";
+} from "https://github.com/Tnifey/arango/raw/main/mod.ts";
 
 const db = new Database({
   url: "http://localhost:8529/",
