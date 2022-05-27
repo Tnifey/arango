@@ -1,0 +1,15 @@
+{
+  "$schema": "https://deno.land/x/denon@2.5.0/schema.json",
+  "scripts": {
+    "dev": {
+      "cmd": "deno run test.ts",
+      "desc": "run development watch",
+      "watch": true,
+      "log": "info"
+    }
+  },
+  "allow": [
+    "net",
+    "env"
+  ]
+}
