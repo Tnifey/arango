@@ -58,16 +58,25 @@ export class Cursor<T extends unknown = unknown> {
     return this.#extra?.stats;
   }
 
+  /**
+   * All records in the cursor as array
+   */
   async all() {
     return await [...this.#result];
   }
 
+  /**
+   * Next record in the cursor
+   */
   async *next() {
     for await (const value of this.#result) {
       yield value;
     }
   }
 
+  /**
+   * Generator for the cursor current results
+   */
   async *[Symbol.asyncIterator](): AsyncGenerator<
     unknown,
     undefined,
@@ -79,10 +88,33 @@ export class Cursor<T extends unknown = unknown> {
     return undefined;
   }
 
-  async more() {
-    return await this.nextBatch();
+  /**
+   * @deprecated use `cursor.nextBatch()` instead
+   */
+  more() {
+    return this.nextBatch();
   }
 
+  /**
+   * Allow to use the cursor as a generator
+   * @example `for await (let next of cursor.iterate())`
+   */
+  async *iterate() {
+    if(!this.hasMore) undefined;
+    let current = this as Cursor<T>;
+    yield current;
+
+    do {
+        current = await current.nextBatch() as Cursor<T>;
+        yield current;
+    } while(current?.hasMore);
+
+    return undefined;
+  }
+
+  /**
+   * Fetch next batch of results if available
+   */
   async nextBatch(): Promise<Cursor | undefined> {
     if (!this.hasMore || !this.#id) return;
     try {
@@ -92,11 +124,14 @@ export class Cursor<T extends unknown = unknown> {
       });
 
       return new Cursor<T>(data, this.#database);
-    } catch (error) {
+    } catch (_error) {
       return undefined;
     }
   }
 
+  /**
+   * Remove the cursor from the server
+   */
   async kill(): Promise<unknown> {
     if (!this.hasMore || !this.#id) return;
     try {

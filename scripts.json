@@ -6,6 +6,11 @@
       "desc": "run development watch",
       "watch": true,
       "log": "info"
+    },
+    "test": {
+      "cmd": "deno test",
+      "desc": "run tests",
+      "watch": false
     }
   },
   "allow": [
