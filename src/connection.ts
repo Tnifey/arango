@@ -30,8 +30,9 @@ export class Connection {
   }
 
   constructor(config?: ConnectionConfig) {
-    if (config?.url && Array.isArray(config.url)) {
-      this.#url = new Set([config.url[0]]);
+    if (config?.url) {
+      const hosts = Array.isArray(config?.url) ? config.url : [config?.url];
+      this.#url = new Set(hosts);
     }
 
     if (config?.auth) {
@@ -64,6 +65,10 @@ export class Connection {
     }
 
     throw new Error("Invalid url");
+  }
+
+  removeUrl(url: string) {
+    return this.#url.delete(url);
   }
 
   useBasicAuth(username = "root", password = "") {
@@ -108,7 +113,7 @@ export class Connection {
     return this.#queues.get(name);
   }
 
-  private getNextUrl() {
+  private getNextHost() {
     return this.url[Math.floor(Math.random() * this.url.length)];
   }
 
@@ -123,7 +128,7 @@ export class Connection {
       transform = (data) => data,
     } = config;
 
-    const host = config?.host || this.getNextUrl();
+    const host = config?.host || this.getNextHost();
     const endpoint = new URL(path, host).href;
 
     const payload: Partial<RequestInit> = {

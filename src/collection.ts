@@ -1,4 +1,4 @@
-import type { Database } from "./database.ts";
+import type { DatabaseLike } from "./fp/types.ts";
 import {
   collectionChecksum,
   collectionCompact,
@@ -21,7 +21,7 @@ import {
 } from "./fp/collections.ts";
 
 export class Collection {
-  #database: Database;
+  #database: DatabaseLike;
   get database() {
     return this.#database;
   }
@@ -193,7 +193,7 @@ export type CollectionGetOptions = {
 
 export interface CollectionConfig {
   name: string;
-  database: Database;
+  database: DatabaseLike;
 }
 
 export enum CollectionType {

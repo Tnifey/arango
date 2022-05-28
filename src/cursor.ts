@@ -1,8 +1,8 @@
-import { Database } from "./database.ts";
+import type { DatabaseLike } from "./fp/types.ts";
 import { cursorDrop, cursorNextBatch } from "./fp/index.ts";
 
 export class Cursor<T extends unknown = unknown> {
-  #database: Database;
+  #database: DatabaseLike;
   get database() {
     return this.#database;
   }
@@ -104,7 +104,7 @@ export class Cursor<T extends unknown = unknown> {
 }
 
 export type CursorConfig = {
-  database: Database;
+  database: DatabaseLike;
   host: string;
   id: string;
   cache?: boolean;

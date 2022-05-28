@@ -1,18 +1,20 @@
+import type { DatabaseLike } from "./types.ts";
 import { Database } from "../database.ts";
 import { ArangoError, ArangoErrorCode } from "../error.ts";
+import { queueRequest } from "../request.ts";
 
-export function databaseCollections(database: Database) {
-  return database.request<{ result: string[] }, string[]>({
+export function databaseCollections(database: DatabaseLike) {
+  return queueRequest<{ result: string[] }, string[]>(database, {
     path: `_api/collection/list`,
     transform: (data) => data.result,
   });
 }
 
 export function databaseCreate(
-  database: Database,
+  database: DatabaseLike,
   options?: DatabaseCreateOptions & { silent?: boolean },
 ) {
-  return database.request<unknown, Database>({
+  return queueRequest<unknown, DatabaseLike>(database, {
     silent: options?.silent,
     method: "POST",
     path: `_api/database/create`,
@@ -22,14 +24,14 @@ export function databaseCreate(
       users: options?.users,
     },
     transform: () => {
-      return database.get({
+      return database.connection.database(database.name).get({
         silent: options?.silent,
       });
     },
   });
 }
 
-export function databaseDrop(database: Database, name: string) {
+export function databaseDrop(database: DatabaseLike, name: string) {
   if (name !== this.name) {
     throw new Error(`ArangoError: database name is not valid`);
   }
@@ -38,14 +40,14 @@ export function databaseDrop(database: Database, name: string) {
     throw new Error(`ArangoError: cannot drop _system database`);
   }
 
-  return database.request<{ result: boolean }, boolean>({
+  return queueRequest<{ result: boolean }, boolean>(database, {
     method: "DELETE",
     path: `_api/database/${database.name}`,
     transform: (data) => data.result,
   });
 }
 
-export async function databaseExists(database: Database): Promise<boolean> {
+export async function databaseExists(database: DatabaseLike): Promise<boolean> {
   try {
     const db = await databaseGet(database);
     return !!db.id;
@@ -62,10 +64,10 @@ export async function databaseExists(database: Database): Promise<boolean> {
 }
 
 export function databaseGet(
-  database: Database,
+  database: DatabaseLike,
   options?: DatabaseGetOptions,
 ): Promise<Database> {
-  return database.request<Partial<Database>, Database>({
+  return queueRequest<Partial<Database>, Database>(database, {
     silent: options?.silent,
     path: `_api/database/current`,
     transform: (data) => {
@@ -78,22 +80,22 @@ export function databaseGet(
   });
 }
 
-export function databaseList(database: Database) {
-  return database.request<{ result: string[] }, string[]>({
+export function databaseList(database: DatabaseLike) {
+  return queueRequest<{ result: string[] }, string[]>(database, {
     path: `_api/database/list`,
     transform: (data) => data.result,
   });
 }
 
-export function databaseUser(database: Database) {
-  return database.request<{ result: string[] }, string[]>({
+export function databaseUser(database: DatabaseLike) {
+  return queueRequest<{ result: string[] }, string[]>(database, {
     path: `_api/database/user`,
     transform: (data) => data.result,
   });
 }
 
-export function databaseVersion(database: Database) {
-  return database.request<{ version: string }, string>({
+export function databaseVersion(database: DatabaseLike) {
+  return queueRequest<{ version: string }, string>(database, {
     path: `_api/database/current/version`,
     transform: (data) => data.version,
   });

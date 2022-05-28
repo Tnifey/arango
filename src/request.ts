@@ -1,5 +1,6 @@
 import { ArangoError } from "./error.ts";
-import { Database } from "./database.ts";
+import { Connection } from "./connection.ts";
+import type { DatabaseLike } from "./fp/types.ts";
 
 export function createFetch(endpoint, payload) {
   return fetch(endpoint, payload).then(async (response) => {
@@ -23,7 +24,7 @@ export function createFetch(endpoint, payload) {
 }
 
 export function createDatabaseRequest<T, R>(
-  database: Database,
+  database: DatabaseLike,
   config: CreateDatabaseRequestConfig<T, R>,
 ) {
   const { path, isAbsolute, silent = false, ...rest } = config;
@@ -40,6 +41,23 @@ export function createDatabaseRequest<T, R>(
     if (silent) return error;
     throw error;
   }
+}
+
+export function queueRequest<T, R>(
+  database: DatabaseLike,
+  config: CreateDatabaseRequestConfig<T, R>,
+) {
+  if (!database || typeof database?.name !== "string" || !database.name) {
+    throw new Error(`ArangoError: database is not a valid database`);
+  }
+
+  if (!database?.connection || !(database.connection instanceof Connection)) {
+    throw new Error(`ArangoError: connection is not a valid connection`);
+  }
+
+  return database.connection.getQueue(database).add(async () => {
+    return await createDatabaseRequest<T, R>(database, config);
+  });
 }
 
 export type CreateDatabaseRequestConfig<T, R> = RequestConfig<R, T> & {

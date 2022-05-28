@@ -1,38 +1,39 @@
-import type { Database } from "./types.ts";
+import type { DatabaseLike } from "./types.ts";
+import { queueRequest } from "../request.ts";
 
-export function usersList(database: Database) {
-  return database.request({
+export function usersList(database: DatabaseLike) {
+  return queueRequest(database, {
     path: `_api/user`,
   });
 }
 
-export function userCreate(database: Database, options) {
-  return database.request({
+export function userCreate(database: DatabaseLike, options) {
+  return queueRequest(database, {
     method: "POST",
     path: `_api/user`,
     body: options,
   });
 }
 
-export function userDrop(database: Database, username: string) {
-  return database.request({
+export function userDrop(database: DatabaseLike, username: string) {
+  return queueRequest(database, {
     method: "DELETE",
     path: `_api/user/${username}`,
   });
 }
 
-export function userGet(database: Database, username: string) {
-  return database.request({
+export function userGet(database: DatabaseLike, username: string) {
+  return queueRequest(database, {
     path: `_api/user/${username}`,
   });
 }
 
 export function userChange(
-  database: Database,
+  database: DatabaseLike,
   username: string,
   options: Record<string, unknown>,
 ) {
-  return database.request({
+  return queueRequest(database, {
     method: "PATCH",
     path: `_api/user/${username}`,
     body: options,
@@ -40,51 +41,51 @@ export function userChange(
 }
 
 export function userReplace(
-  database: Database,
+  database: DatabaseLike,
   username: string,
   options: Record<string, unknown>,
 ) {
-  return database.request({
+  return queueRequest(database, {
     method: "PUT",
     path: `_api/user/${username}`,
     body: options,
   });
 }
 
-export function userDatabases(database: Database, username: string) {
-  return database.request({
+export function userDatabases(database: DatabaseLike, username: string) {
+  return queueRequest(database, {
     path: `_api/user/${username}/database`,
   });
 }
 
 export function userDatabaseAccessDrop(
-  database: Database,
+  database: DatabaseLike,
   username: string,
   databaseName: string,
 ) {
-  return database.request({
+  return queueRequest(database, {
     method: "DELETE",
     path: `_api/user/${username}/database/${databaseName}`,
   });
 }
 
 export function userDatabaseAccess(
-  database: Database,
+  database: DatabaseLike,
   username: string,
   databaseName: string,
 ) {
-  return database.request({
+  return queueRequest(database, {
     path: `_api/user/${username}/database/${databaseName}`,
   });
 }
 
 export function userDatabaseAccessSet(
-  database: Database,
+  database: DatabaseLike,
   username: string,
   databaseName: string,
   options: Record<string, unknown>,
 ) {
-  return database.request({
+  return queueRequest(database, {
     method: "PUT",
     path: `_api/user/${username}/database/${databaseName}`,
     body: options,
@@ -92,25 +93,25 @@ export function userDatabaseAccessSet(
 }
 
 export function userCollectionAccess(
-  database: Database,
+  database: DatabaseLike,
   username: string,
   databaseName: string,
   collectionName: string,
 ) {
-  return database.request({
+  return queueRequest(database, {
     path:
       `_api/user/${username}/database/${databaseName}/collection/${collectionName}`,
   });
 }
 
 export function userCollectionAccessSet(
-  database: Database,
+  database: DatabaseLike,
   username: string,
   databaseName: string,
   collectionName: string,
   options: Record<string, unknown>,
 ) {
-  return database.request({
+  return queueRequest(database, {
     method: "PUT",
     path:
       `_api/user/${username}/database/${databaseName}/collection/${collectionName}`,

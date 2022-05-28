@@ -81,9 +81,13 @@ export class Database {
 
     this.#name = config.name;
 
+    if(!(config.connection instanceof Connection)) {
+      throw new Error(`ArangoError: connection is not a valid connection in ${config.name} database`);
+    }
+
     this.#connection = config?.connection;
-    if(this.connection.databases.has(config.name)) {
-      return this.connection.databases.get(config.name);
+    if (this.connection.databases.has(config.name)) {
+      return this.connection.databases.get(config.name) as unknown as Database;
     }
 
     if (config.isAbsolute) {

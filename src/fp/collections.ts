@@ -1,7 +1,8 @@
-import type { Database } from "./types.ts";
+import type { DatabaseLike } from "./types.ts";
+import { queueRequest } from "../request.ts";
 
 export function collectionCreate(
-  database: Database,
+  database: DatabaseLike,
   options: CollectionCreateOptions,
 ) {
   if (!options.name || typeof options.name !== "string") {
@@ -12,7 +13,7 @@ export function collectionCreate(
     throw new Error("Collection type is required: 1 for document, 2 for edges");
   }
 
-  return database.request({
+  return queueRequest(database, {
     method: "POST",
     path: `_api/collection/${options.name}`,
     body: options,
@@ -20,11 +21,11 @@ export function collectionCreate(
 }
 
 export function collectionDrop(
-  database: Database,
+  database: DatabaseLike,
   collectionName: string,
   options?: { silent?: boolean },
 ) {
-  return database.request({
+  return queueRequest(database, {
     silent: options?.silent,
     method: "DELETE",
     path: `_api/collection/${collectionName}`,
@@ -32,154 +33,163 @@ export function collectionDrop(
 }
 
 export function collectionGet(
-  database: Database,
+  database: DatabaseLike,
   collectionName: string,
   options,
 ) {
-  return database.request({
+  return queueRequest(database, {
     silent: options?.silent,
     path: `_api/collection/${collectionName}`,
   });
 }
 
-// function collectionChecksum
-export function collectionChecksum(database: Database, collectionName: string) {
-  return database.request({
+export function collectionChecksum(
+  database: DatabaseLike,
+  collectionName: string,
+) {
+  return queueRequest(database, {
     path: `_api/collection/${collectionName}/checksum`,
   });
 }
 
-// function collectionCompact
-export function collectionCompact(database: Database, collectionName: string) {
-  return database.request({
+export function collectionCompact(
+  database: DatabaseLike,
+  collectionName: string,
+) {
+  return queueRequest(database, {
     method: "PUT",
     path: `_api/collection/${collectionName}/compact`,
   });
 }
 
-// function collectionCount
-export function collectionCount(database: Database, collectionName: string) {
-  return database.request({
+export function collectionCount(
+  database: DatabaseLike,
+  collectionName: string,
+) {
+  return queueRequest(database, {
     path: `_api/collection/${collectionName}/count`,
   });
 }
 
-// function collectionFigures
-export function collectionFigures(database: Database, collectionName: string) {
-  return database.request({
+export function collectionFigures(
+  database: DatabaseLike,
+  collectionName: string,
+) {
+  return queueRequest(database, {
     path: `_api/collection/${collectionName}/figures`,
   });
 }
 
-// function collectionLoad
 export function collectionLoad(
-  database: Database,
+  database: DatabaseLike,
   collectionName: string,
   options?,
 ) {
-  return database.request({
+  return queueRequest(database, {
     silent: options?.silent,
     method: "PUT",
     path: `_api/collection/${collectionName}/load`,
   });
 }
 
-// function collectionLoadIndexesIntoMemory
 export function collectionLoadIndexesIntoMemory(
-  database: Database,
+  database: DatabaseLike,
   collectionName: string,
 ) {
-  return database.request({
+  return queueRequest(database, {
     method: "PUT",
     path: `_api/collection/${collectionName}/loadIndexesIntoMemory`,
   });
 }
 
-// function collectionProperties
 export function collectionProperties(
-  database: Database,
+  database: DatabaseLike,
   collectionName: string,
 ) {
-  return database.request({
+  return queueRequest(database, {
     path: `_api/collection/${collectionName}/properties`,
   });
 }
 
-// function collectionSetProperties
 export function collectionSetProperties(
-  database: Database,
+  database: DatabaseLike,
   collectionName: string,
   options,
 ) {
-  return database.request({
+  return queueRequest(database, {
     method: "PUT",
     path: `_api/collection/${collectionName}/properties`,
     body: options,
   });
 }
 
-// function collectionRecalculateCount
 export function collectionRecalculateCount(
-  database: Database,
+  database: DatabaseLike,
   collectionName: string,
 ) {
-  return database.request({
+  return queueRequest(database, {
     method: "PUT",
     path: `_api/collection/${collectionName}/recalculateCount`,
   });
 }
 
-// function collectionRename
 export function collectionRename(
-  database: Database,
+  database: DatabaseLike,
   collectionName: string,
   newName: string,
 ) {
-  return database.request({
+  return queueRequest(database, {
     method: "PUT",
     path: `_api/collection/${collectionName}/rename`,
     body: { name: newName },
   });
 }
 
-// function collectionResponsibleShard
 export function collectionResponsibleShard(
-  database: Database,
+  database: DatabaseLike,
   collectionName: string,
   options,
 ) {
-  return database.request({
+  return queueRequest(database, {
     method: "PUT",
     path: `_api/collection/${collectionName}/responsibleShard`,
     body: options,
   });
 }
 
-// function collectionRevision
-export function collectionRevision(database: Database, collectionName: string) {
-  return database.request({
+export function collectionRevision(
+  database: DatabaseLike,
+  collectionName: string,
+) {
+  return queueRequest(database, {
     path: `_api/collection/${collectionName}/revision`,
   });
 }
 
-// function collectionShards
-export function collectionShards(database: Database, collectionName: string) {
-  return database.request({
+export function collectionShards(
+  database: DatabaseLike,
+  collectionName: string,
+) {
+  return queueRequest(database, {
     path: `_api/collection/${collectionName}/shards`,
   });
 }
 
-// function collectionTruncate
-export function collectionTruncate(database: Database, collectionName: string) {
-  return database.request({
+export function collectionTruncate(
+  database: DatabaseLike,
+  collectionName: string,
+) {
+  return queueRequest(database, {
     method: "PUT",
     path: `_api/collection/${collectionName}/truncate`,
   });
 }
 
-// function collectionUnload
-export function collectionUnload(database: Database, collectionName: string) {
-  return database.request({
+export function collectionUnload(
+  database: DatabaseLike,
+  collectionName: string,
+) {
+  return queueRequest(database, {
     method: "PUT",
     path: `_api/collection/${collectionName}/unload`,
   });
