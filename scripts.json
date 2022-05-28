@@ -5,7 +5,8 @@
       "cmd": "deno run test.ts",
       "desc": "run development watch",
       "watch": true,
-      "log": "info"
+      "log": "info",
+      "tsconfig": "deno.jsonc"
     },
     "test": {
       "cmd": "deno test",
@@ -15,6 +16,7 @@
   },
   "allow": [
     "net",
-    "env"
+    "env",
+    "read"
   ]
 }
