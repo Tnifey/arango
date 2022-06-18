@@ -1,11 +1,11 @@
 Simple ArangoDB driver for Deno
 
 ```
-arangodb: 3.7.10
+arangodb: 3.9.1
 ---
-deno 1.8.2 (release, x86_64-unknown-linux-gnu)
-v8 9.0.257.3
-typescript 4.2.2
+deno 1.23.0 (release, x86_64-unknown-linux-gnu)
+v8 10.4.132.5
+typescript 4.7.2
 ```
 
 ## Usage
