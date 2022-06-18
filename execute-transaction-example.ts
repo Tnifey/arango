@@ -1,10 +1,11 @@
-import { Database } from "./mod.ts";
+import { Connection } from "./mod.ts";
 
-const db = new Database({
-  name: "_system",
-  url: "http://localhost:8529/",
+const connection = new Connection({
+  url: ["http://localhost:8529/"],
   auth: { username: "root" },
 });
+
+const db = connection.database("_system");
 
 try {
   const result = await db.executeTransaction({

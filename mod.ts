@@ -1,7 +1,7 @@
 import { Connection, ConnectionConfig } from "./src/connection.ts";
 
 export default function createConnection(options?: ConnectionConfig) {
-    return new Connection(options);
+  return new Connection(options);
 }
 
 export * from "./src/connection.ts";

@@ -1,17 +1,11 @@
-import { aql, Database } from "./mod.ts";
+import { aql, Connection } from "./mod.ts";
 
-const db = new Database({
-  url: "http://localhost:8529/",
+const connection = new Connection({
+  url: ["http://localhost:8529/"],
   auth: { username: "root" },
-  name: "_system", // database name
 });
 
-// Alternative:
-// const pool = arango({
-//   url: "http://localhost:8529/",
-//   auth: { username: "root" },
-// });
-// const db = pool.database('_system');
+const db = connection.database("_system");
 
 const payload = 4;
 
@@ -28,7 +22,7 @@ try {
     cursor: await cursor.all(), // all results
   });
 
-  const more = await cursor.more(); // it is new Cursor or undefined
+  const more = await cursor.nextBatch(); // it is new Cursor or undefined
 
   console.log({
     more: await more?.all(),

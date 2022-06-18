@@ -1,4 +1,4 @@
-export * from "https://raw.githubusercontent.com/Tnifey/aql-tag/0.0.3/src/mod.ts";
+export * from "https://raw.githubusercontent.com/Tnifey/aql-tag/0.0.4/mod.ts";
 
 export type {
   AqlLiteral,
@@ -7,4 +7,4 @@ export type {
   AqlValue,
   ArangoCollection,
   GeneratedAqlQuery,
-} from "https://raw.githubusercontent.com/Tnifey/aql-tag/0.0.3/src/mod.ts";
+} from "https://raw.githubusercontent.com/Tnifey/aql-tag/0.0.4/mod.ts";

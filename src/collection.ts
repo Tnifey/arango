@@ -73,8 +73,21 @@ export class Collection {
     this.#name = name;
   }
 
+  async exists() {
+    try {
+      await this.get();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   async get(options?: CollectionGetOptions) {
-    const data: any = await collectionGet(this.database, this.name, options);
+    const data: unknown & Collection = await collectionGet(
+      this.database,
+      this.name,
+      options,
+    );
 
     if (!data) return;
 
@@ -84,11 +97,12 @@ export class Collection {
     this.#id = data.id;
     this.#globallyUniqueId = data.globallyUniqueId;
     this.#status = data.status;
+
     return this;
   }
 
   async create(options?) {
-    const data: any = await collectionCreate(this.database, {
+    const data: unknown & Collection = await collectionCreate(this.database, {
       name: this.name,
       ...options,
     });
@@ -106,7 +120,11 @@ export class Collection {
   }
 
   async drop(name: string, options?) {
-    const data: any = await collectionDrop(this.database, name, options);
+    const data: unknown & Collection = await collectionDrop(
+      this.database,
+      name,
+      options,
+    );
     if (!data) return;
     this.#status = CollectionStatus.DELETED;
     return data.id;

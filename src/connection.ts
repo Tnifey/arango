@@ -38,7 +38,7 @@ export class Connection {
   get strategy() {
     return this.#strategy;
   }
-  
+
   // current strategy host for round-robin
   #strategyHost = -1;
 
@@ -52,7 +52,8 @@ export class Connection {
       this._auth(config.auth);
     }
 
-    this.#strategy = ConnectionStrategy[config?.strategy ?? "random"] || ConnectionStrategy.random;
+    this.#strategy = ConnectionStrategy[config?.strategy ?? "random"] ||
+      ConnectionStrategy.random;
   }
 
   private _auth(auth?: BasicAuthCredentials | BearerAuthCredentials): void {
@@ -129,7 +130,7 @@ export class Connection {
   }
 
   private getNextHost() {
-    if(this.#strategy === ConnectionStrategy['round-robin']) {
+    if (this.#strategy === ConnectionStrategy["round-robin"]) {
       this.#strategyHost = (this.#strategyHost + 1) % this.#url.size;
       return [...this.url][this.#strategyHost];
     }
@@ -178,7 +179,7 @@ export class Connection {
   }
 
   database(name: string) {
-    return new Database({ 
+    return new Database({
       connection: this,
       name,
     });

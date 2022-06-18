@@ -1,20 +1,20 @@
-import { aql, Database } from "./mod.ts";
-import { CollectionType } from "./src/types.ts";
+import { aql, CollectionType, Connection } from "./mod.ts";
 
-const db = new Database({
-  url: "http://localhost:8529/",
+const connection = new Connection({
+  url: ["http://localhost:8529/"],
   auth: { username: "root" },
-  name: "_system", // database name
 });
+
+const db = connection.database("_system");
 
 const collectionName = "test-collection";
 const collection = db.collection(collectionName);
 
 const exists = await collection.exists();
 if (!exists) { // create collection if not exists
-  await db.createCollection({
+  await collection.create({
     name: collectionName,
-    type: CollectionType.DOCUMENT_COLLECTION, // 2 - document collection, 3 - edge collection
+    type: CollectionType.DOCUMENT, // 2 - document collection, 3 - edge collection
   });
 }
 
