@@ -7,9 +7,5 @@ export const qs = QS as {
 };
 
 export { default as ArangoErrorCode } from "https://raw.githubusercontent.com/oprogramador/arangodb-error-codes/288426d121493e1a86c2304ff5431662d560c589/app/index.js";
-
 export { default as PQueue } from "https://cdn.skypack.dev/p-queue@v7.2.0?dts";
-
-export * as rxjs from "https://cdn.skypack.dev/rxjs@v7.5.5";
-
 export { default as cleanStack } from "https://cdn.skypack.dev/clean-stack";
