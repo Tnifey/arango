@@ -1,3 +1,9 @@
+import { Connection, ConnectionConfig } from "./src/connection.ts";
+
+export default function createConnection(options?: ConnectionConfig) {
+    return new Connection(options);
+}
+
 export * from "./src/connection.ts";
 export * from "./src/database.ts";
 export * from "./src/cursor.ts";

@@ -2,6 +2,11 @@ import { createFetch, RequestConfig } from "./request.ts";
 import { Database } from "./database.ts";
 import { initializeQueue } from "./queue.ts";
 
+export enum ConnectionStrategy {
+  "random" = "random",
+  "round-robin" = "round-robin",
+}
+
 export class Connection {
   #url: Set<string> = new Set(["http://localhost:8529"]);
   get url() {
@@ -24,10 +29,18 @@ export class Connection {
     return this.#queues;
   }
 
-  #databases: Map<string, Database> = new Map();
-  get databases() {
-    return this.#databases;
+  #connectedDatabases: Map<string, Database> = new Map();
+  get connectedDatabases() {
+    return this.#connectedDatabases;
   }
+
+  #strategy: ConnectionStrategy = ConnectionStrategy.random;
+  get strategy() {
+    return this.#strategy;
+  }
+  
+  // current strategy host for round-robin
+  #strategyHost = -1;
 
   constructor(config?: ConnectionConfig) {
     if (config?.url) {
@@ -38,6 +51,8 @@ export class Connection {
     if (config?.auth) {
       this._auth(config.auth);
     }
+
+    this.#strategy = ConnectionStrategy[config?.strategy ?? "random"] || ConnectionStrategy.random;
   }
 
   private _auth(auth?: BasicAuthCredentials | BearerAuthCredentials): void {
@@ -114,6 +129,10 @@ export class Connection {
   }
 
   private getNextHost() {
+    if(this.#strategy === ConnectionStrategy['round-robin']) {
+      this.#strategyHost = (this.#strategyHost + 1) % this.#url.size;
+      return [...this.url][this.#strategyHost];
+    }
     return this.url[Math.floor(Math.random() * this.url.length)];
   }
 
@@ -159,13 +178,15 @@ export class Connection {
   }
 
   database(name: string) {
-    return new Database({ connection: this, name });
+    return new Database({ 
+      connection: this,
+      name,
+    });
   }
 
   toJSON() {
     return {
       url: this.url,
-      headers: this.headers,
     };
   }
 }
@@ -193,9 +214,15 @@ export type BearerAuthCredentials = {
 };
 
 export interface ConnectionConfig {
-  url?: [string];
+  url?: string[];
   auth?: BasicAuthCredentials | BearerAuthCredentials;
   arangoVersion?: number;
   headers?: Headers | Record<string, string>;
   debug?: boolean;
+  /**
+   * The strategy to use when selecting a host.
+   * @default "random"
+   * @see https://www.arangodb.com/docs/stable/aql/aql-query-language-reference.html#connection-strategy
+   */
+  strategy?: "round-robin" | "random";
 }

@@ -86,8 +86,8 @@ export class Database {
     }
 
     this.#connection = config?.connection;
-    if (this.connection.databases.has(config.name)) {
-      return this.connection.databases.get(config.name) as unknown as Database;
+    if (this.connection.connectedDatabases.has(config.name)) {
+      return this.connection.connectedDatabases.get(config.name) as unknown as Database;
     }
 
     if (config.isAbsolute) {
@@ -101,7 +101,7 @@ export class Database {
       );
     }
 
-    this.connection.databases.set(this.name, this);
+    this.connection.connectedDatabases.set(this.name, this);
   }
 
   request<T extends unknown = unknown, R = T>(
@@ -123,8 +123,18 @@ export class Database {
     return databaseVersion(this);
   }
 
-  get(options?: { silent?: boolean }) {
-    return databaseGet(this, options);
+  async get(options?: { silent?: boolean, litter?: boolean }) {
+    const database = await databaseGet(this, options);
+    if(options?.litter === false) return database;
+
+    this.#id = database.id;
+    this.#path = database.path;
+    this.#isSystem = database.isSystem;
+    this.#sharding = database.sharding;
+    this.#replicationFactor = database.replicationFactor;
+    this.#writeConcern = database.writeConcern;
+
+    return this;
   }
 
   exists() {
