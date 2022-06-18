@@ -2,13 +2,13 @@ version: "3.2"
 
 services:
   arango:
-    image: "arangodb:3.7.10"
+    image: "arangodb/arangodb:3.9.1"
     environment:
       - "ARANGO_NO_AUTH=1"
     ports:
       - "8529:8529"
   arango_with_password:
-    image: "arangodb:3.7.10"
+    image: "arangodb/arangodb:3.9.1"
     environment:
       - "ARANGO_ROOT_PASSWORD=secret"
     ports:

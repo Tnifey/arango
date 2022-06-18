@@ -1,20 +1,12 @@
-import { IPoolConfig } from "./src/types.ts";
-import { Pool } from "./src/Pool.ts";
-import { Database } from "./src/Database.ts";
+import { Connection, ConnectionConfig } from "./src/connection.ts";
 
-export { Database, Pool };
-
-/**
- * Pool factory function
- * @param config
- */
-export default function arango(config?: IPoolConfig) {
-  return new Pool(config);
+export default function createConnection(options?: ConnectionConfig) {
+  return new Connection(options);
 }
 
-export {
-  aql,
-  isAqlLiteral,
-  isArangoCollection,
-  isGeneratedAqlQuery,
-} from "./src/deps.ts";
+export * from "./src/connection.ts";
+export * from "./src/database.ts";
+export * from "./src/cursor.ts";
+export * from "./src/collection.ts";
+export * from "./src/error.ts";
+export * from "./src/aql.ts";
